@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import time
 
 # --- Configuration ---
 N8N_WEBHOOK_URL = "https://fitreisen2.app.n8n.cloud/webhook/c8f9ba3d-73e8-41a7-9a83-64bde6b1c720"
@@ -19,13 +20,15 @@ TEXTS = {
         "title": "💬 Wiki Chatbot",
         "subtitle": "Stellen Sie Fragen zur Unternehmens-Wiki",
         "input": "Ihre Nachricht...",
-        "send": "Senden"
+        "send": "Senden",
+        "loading": "Der Bot antwortet..."
     },
     "en": {
         "title": "💬 Wiki Chatbot",
         "subtitle": "Ask anything about the company wiki",
         "input": "Type your message...",
-        "send": "Send"
+        "send": "Send",
+        "loading": "Bot is typing..."
     }
 }
 
@@ -79,21 +82,33 @@ if submit_button and user_input:
     # Add user message
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # Call n8n webhook
-    try:
-        response = requests.post(
-            N8N_WEBHOOK_URL,
-            json={"message": user_input}
-        )
-        response.raise_for_status()
-        bot_reply = response.json().get("output", "Keine Antwort vom Bot." if st.session_state.lang=="de" else "No response from bot.")
-    except Exception as e:
-        bot_reply = f"Error: {e}"
-
+    # Placeholder for bot reply
+    bot_placeholder = st.empty()
+    
+    # Show spinner while waiting
+    with st.spinner(TEXTS[st.session_state.lang]["loading"]):
+        try:
+            response = requests.post(
+                N8N_WEBHOOK_URL,
+                json={"message": user_input}
+            )
+            response.raise_for_status()
+            bot_reply = response.json().get(
+                "output",
+                "Keine Antwort vom Bot." if st.session_state.lang=="de" else "No response from bot."
+            )
+            # Optional: simulate slight delay for better UX
+            time.sleep(0.5)
+        except Exception as e:
+            bot_reply = f"Error: {e}"
+    
     # Add bot response
     st.session_state.messages.append({"role": "bot", "content": bot_reply})
+    
+    # Update placeholder with bot response
+    bot_placeholder.markdown(f"<div class='bot-container'><div class='bot-message'>{bot_reply}</div></div>", unsafe_allow_html=True)
 
-# --- Display conversation ---
+# --- Display previous conversation ---
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f"<div class='user-container'><div class='user-message'>{msg['content']}</div></div>", unsafe_allow_html=True)
