@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 
+
 # --- Configuration ---
 # Replace this with your n8n webhook URL
 N8N_WEBHOOK_URL = "https://fitreisen2.app.n8n.cloud/webhook-test/c8f9ba3d-73e8-41a7-9a83-64bde6b1c720"
