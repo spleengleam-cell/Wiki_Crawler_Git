@@ -4,7 +4,7 @@ import requests
 
 # --- Configuration ---
 # Replace this with your n8n webhook URL
-N8N_WEBHOOK_URL = "https://fitreisen2.app.n8n.cloud/webhook-test/c8f9ba3d-73e8-41a7-9a83-64bde6b1c720"
+N8N_WEBHOOK_URL = "https://fitreisen2.app.n8n.cloud/webhook/c8f9ba3d-73e8-41a7-9a83-64bde6b1c720"
 
 st.set_page_config(page_title="My n8n Chatbot", page_icon="💬")
 
@@ -30,7 +30,7 @@ if st.button("Send") or user_input:
                 json={"message": user_input}  # Adjust depending on your webhook payload
             )
             response.raise_for_status()
-            bot_reply = response.json().get("reply", "No response from bot.")
+            bot_reply = response.json().get("output", "No response from bot.")
         except Exception as e:
             bot_reply = f"Error: {e}"
 
