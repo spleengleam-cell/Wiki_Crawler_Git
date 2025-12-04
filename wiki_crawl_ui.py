@@ -32,11 +32,14 @@ TEXTS = {
     }
 }
 
-# --- Language toggle button ---
-col1, col2 = st.columns([0.9, 0.1])
-with col2:
+# --- Top buttons: Language toggle + Clear chat ---
+col1, col2 = st.columns([0.8, 0.2])
+with col1:
     if st.button("EN" if st.session_state.lang == "de" else "DE"):
         st.session_state.lang = "en" if st.session_state.lang == "de" else "de"
+with col2:
+    if st.button("🗑️ Chat löschen"):
+        st.session_state.messages = []
 
 # --- Header ---
 st.markdown(f"<h1 style='text-align: center;'>{TEXTS[st.session_state.lang]['title']}</h1>", unsafe_allow_html=True)
@@ -85,7 +88,7 @@ if submit_button and user_input:
     # Placeholder for bot reply
     bot_placeholder = st.empty()
     
-    # Show spinner while waiting
+    # Show spinner while waiting for bot response
     with st.spinner(TEXTS[st.session_state.lang]["loading"]):
         try:
             response = requests.post(
@@ -97,18 +100,14 @@ if submit_button and user_input:
                 "output",
                 "Keine Antwort vom Bot." if st.session_state.lang=="de" else "No response from bot."
             )
-            # Optional: simulate slight delay for better UX
-            time.sleep(0.5)
+            time.sleep(0.5)  # optional small delay for UX
         except Exception as e:
             bot_reply = f"Error: {e}"
     
-    # Add bot response
+    # Add bot response to session messages
     st.session_state.messages.append({"role": "bot", "content": bot_reply})
-    
-    # Update placeholder with bot response
-    bot_placeholder.markdown(f"<div class='bot-container'><div class='bot-message'>{bot_reply}</div></div>", unsafe_allow_html=True)
 
-# --- Display previous conversation ---
+# --- Display conversation ---
 for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f"<div class='user-container'><div class='user-message'>{msg['content']}</div></div>", unsafe_allow_html=True)
