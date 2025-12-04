@@ -21,14 +21,14 @@ TEXTS = {
         "subtitle": "Stellen Sie Fragen zur Unternehmens-Wiki",
         "input": "Ihre Nachricht...",
         "send": "Senden",
-        "loading": "Der Bot antwortet..."
+        "loading": "am denken..."
     },
     "en": {
         "title": "💬 Wiki Chatbot",
         "subtitle": "Ask anything about the company wiki",
         "input": "Type your message...",
         "send": "Send",
-        "loading": "Bot is typing..."
+        "loading": "thinking..."
     }
 }
 
