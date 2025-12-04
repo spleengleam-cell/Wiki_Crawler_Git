@@ -122,7 +122,7 @@ with input_container:
             except Exception as e:
                 bot_reply = f"Error: {e}"
         st.session_state.messages.append({"role": "bot", "content": bot_reply})
-        st.experimental_rerun()
+        st.rerun()
 
 # --- Clear chat button at bottom right ---
 if st.button(TEXTS[st.session_state.lang]["clear"], key="clear-cache-button"):
