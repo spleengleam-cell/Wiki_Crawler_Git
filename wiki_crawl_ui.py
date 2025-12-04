@@ -21,31 +21,32 @@ TEXTS = {
         "subtitle": "Stellen Sie Fragen zur Unternehmens-Wiki",
         "input": "Ihre Nachricht...",
         "send": "Senden",
-        "loading": "am denken..."
+        "loading": "am denken...",
+        "clear": "Verlauf löschen",
+        "lang_toggle": "EN"
     },
     "en": {
         "title": "💬 Wiki Chatbot",
         "subtitle": "Ask anything about the company wiki",
         "input": "Type your message...",
         "send": "Send",
-        "loading": "thinking..."
+        "loading": "thinking...",
+        "clear": "Clear Cache",
+        "lang_toggle": "DE"
     }
 }
 
-# --- Top buttons: Language toggle + Clear chat ---
-col1, col2 = st.columns([0.8, 0.2])
+# --- Top bar: language toggle ---
+col1, col2 = st.columns([0.95, 0.05])
 with col1:
-    if st.button("EN" if st.session_state.lang == "de" else "DE"):
+    if st.button(TEXTS[st.session_state.lang]["lang_toggle"]):
         st.session_state.lang = "en" if st.session_state.lang == "de" else "de"
-with col2:
-    if st.button("🗑️ Chat löschen"):
-        st.session_state.messages = []
 
 # --- Header ---
 st.markdown(f"<h1 style='text-align: center;'>{TEXTS[st.session_state.lang]['title']}</h1>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color:gray;'>{TEXTS[st.session_state.lang]['subtitle']}</p>", unsafe_allow_html=True)
 
-# --- CSS for chat bubbles + scrollable chat history + sticky input ---
+# --- CSS ---
 st.markdown("""
 <style>
 .user-message {
@@ -64,30 +65,34 @@ st.markdown("""
     max-width: 70%;
     margin-bottom: 5px;
 }
-.user-container {
-    text-align: right;
+.user-container { text-align: right; }
+.bot-container { text-align: left; }
+.chat-history { max-height: 65vh; overflow-y: auto; padding-bottom: 10px; }
+.stTextInput>div>div>input { padding: 10px; }
+input:focus, textarea:focus, button:focus { outline: none; }
+
+/* Clear button at bottom right */
+#clear-cache-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 9999;
 }
-.bot-container {
-    text-align: left;
-}
-.chat-history {
-    max-height: 65vh;
-    overflow-y: auto;
-    padding-bottom: 10px;
-}
-.stTextInput>div>div>input {
-    padding: 10px;
-}
-input:focus, textarea:focus, button:focus {
-    outline: none;
+#clear-cache-button:hover {
+    background-color: #d32f2f;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # --- Chat history container ---
 chat_history = st.container()
-
-# --- Display conversation ---
 with chat_history:
     for msg in st.session_state.messages:
         if msg["role"] == "user":
@@ -103,19 +108,11 @@ with input_container:
         submit_button = st.form_submit_button(TEXTS[st.session_state.lang]["send"])
 
     if submit_button and user_input:
-        # Add user message
         st.session_state.messages.append({"role": "user", "content": user_input})
-        
-        # Placeholder for bot reply
         bot_placeholder = st.empty()
-        
-        # Show spinner while waiting for bot response
         with st.spinner(TEXTS[st.session_state.lang]["loading"]):
             try:
-                response = requests.post(
-                    N8N_WEBHOOK_URL,
-                    json={"message": user_input}
-                )
+                response = requests.post(N8N_WEBHOOK_URL, json={"message": user_input})
                 response.raise_for_status()
                 bot_reply = response.json().get(
                     "output",
@@ -124,9 +121,10 @@ with input_container:
                 time.sleep(0.5)
             except Exception as e:
                 bot_reply = f"Error: {e}"
-        
-        # Add bot response
         st.session_state.messages.append({"role": "bot", "content": bot_reply})
-        
-        # Rerun to display updated chat
-        st.rerun()
+        st.experimental_rerun()
+
+# --- Clear chat button at bottom right ---
+if st.button(TEXTS[st.session_state.lang]["clear"], key="clear-cache-button"):
+    st.session_state.messages = []
+    st.experimental_rerun()
