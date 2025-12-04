@@ -22,7 +22,7 @@ TEXTS = {
         "input": "Ihre Nachricht...",
         "send": "Senden",
         "loading": "am denken...",
-        "clear": "Verlauf löschen",
+        "clear": "Verlauf entfernen",
         "lang_toggle": "EN"
     },
     "en": {
@@ -127,4 +127,4 @@ with input_container:
 # --- Clear chat button at bottom right ---
 if st.button(TEXTS[st.session_state.lang]["clear"], key="clear-cache-button"):
     st.session_state.messages = []
-    st.experimental_rerun()
+    st.rerun()
